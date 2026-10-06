@@ -1,0 +1,16 @@
+Lab Copilot
+Copyright (C) 2026 Lab Copilot contributors.
+
+This project's original code is licensed under GNU AGPL version 3 only
+(SPDX: AGPL-3.0-only). See LICENSE for the complete terms.
+Third-party dependencies and bundled assets retain their own licenses.
+See THIRD_PARTY_NOTICES.md and the licenses distributed with those assets.
+
+Maintainer: Zzy522 — https://github.com/Zzy522
+Contact: WeChat jingzbdcjl
+Community source: https://github.com/Zzy522/labcop
+
+When providing a modified AGPL-covered network service, offer its users
+the corresponding source of the version they are running, including the
+required build and installation scripts. A private repository or a link
+to a different version is not a substitute for that source.

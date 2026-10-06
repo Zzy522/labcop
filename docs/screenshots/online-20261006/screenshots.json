@@ -1,0 +1,578 @@
+[
+  {
+    "file": "03-admin-home.png",
+    "caption": "管理员管理总览",
+    "role": "admin",
+    "url": "https://labcopai.com/admin",
+    "capturedAt": "2026-10-06T11:03:09.714Z",
+    "source": "live production UI",
+    "redacted": true
+  },
+  {
+    "file": "04-research-overview.png",
+    "caption": "科研总览与课题进度",
+    "role": "admin",
+    "url": "https://labcopai.com/admin/research",
+    "capturedAt": "2026-10-06T11:03:11.483Z",
+    "source": "live production UI",
+    "redacted": true
+  },
+  {
+    "file": "06-reagents.png",
+    "caption": "试剂总览与库存",
+    "role": "admin",
+    "url": "https://labcopai.com/admin/reagents",
+    "capturedAt": "2026-10-06T11:03:19.186Z",
+    "source": "live production UI",
+    "redacted": true
+  },
+  {
+    "file": "10-equipment.png",
+    "caption": "设备管理",
+    "role": "admin",
+    "url": "https://labcopai.com/admin/equipment",
+    "capturedAt": "2026-10-06T11:03:21.241Z",
+    "source": "live production UI",
+    "redacted": true
+  },
+  {
+    "file": "13-members.png",
+    "caption": "成员列表、角色与账号管理",
+    "role": "admin",
+    "url": "https://labcopai.com/admin/members",
+    "capturedAt": "2026-10-06T11:14:25.163Z",
+    "source": "live production UI",
+    "redacted": true
+  },
+  {
+    "file": "14-account-applications.png",
+    "caption": "加入实验室的账号申请",
+    "role": "admin",
+    "url": "https://labcopai.com/admin/members/applications",
+    "capturedAt": "2026-10-06T11:03:24.665Z",
+    "source": "live production UI",
+    "redacted": true
+  },
+  {
+    "file": "15-review.png",
+    "caption": "业务审批中心",
+    "role": "admin",
+    "url": "https://labcopai.com/admin/review",
+    "capturedAt": "2026-10-06T11:03:26.400Z",
+    "source": "live production UI",
+    "redacted": true
+  },
+  {
+    "file": "17-inspections-admin.png",
+    "caption": "安全巡检管理",
+    "role": "admin",
+    "url": "https://labcopai.com/admin/inspections",
+    "capturedAt": "2026-10-06T11:03:28.140Z",
+    "source": "live production UI",
+    "redacted": true
+  },
+  {
+    "file": "05-member-home.png",
+    "caption": "实验员个人工作台",
+    "role": "member",
+    "url": "https://labcopai.com/user",
+    "capturedAt": "2026-10-06T11:03:30.839Z",
+    "source": "live production UI",
+    "redacted": true
+  },
+  {
+    "file": "19-qualifications.png",
+    "caption": "人员资质管理",
+    "role": "admin",
+    "url": "https://labcopai.com/admin/qualifications",
+    "capturedAt": "2026-10-06T11:03:32.071Z",
+    "source": "live production UI",
+    "redacted": true
+  },
+  {
+    "file": "09-my-applications.png",
+    "caption": "实验员我的申请",
+    "role": "member",
+    "url": "https://labcopai.com/user/applications",
+    "capturedAt": "2026-10-06T11:03:32.481Z",
+    "source": "live production UI",
+    "redacted": true
+  },
+  {
+    "file": "20-reports.png",
+    "caption": "报表中心",
+    "role": "admin",
+    "url": "https://labcopai.com/admin/reports",
+    "capturedAt": "2026-10-06T11:03:33.740Z",
+    "source": "live production UI",
+    "redacted": true
+  },
+  {
+    "file": "11-equipment-booking.png",
+    "caption": "实验员设备预约",
+    "role": "member",
+    "url": "https://labcopai.com/user/equipment-apply",
+    "capturedAt": "2026-10-06T11:03:34.117Z",
+    "source": "live production UI",
+    "redacted": true
+  },
+  {
+    "file": "21-rules.png",
+    "caption": "审批与预警规则",
+    "role": "admin",
+    "url": "https://labcopai.com/admin/rules",
+    "capturedAt": "2026-10-06T11:03:35.394Z",
+    "source": "live production UI",
+    "redacted": true
+  },
+  {
+    "file": "18-inspections-member.png",
+    "caption": "实验员安全巡检",
+    "role": "member",
+    "url": "https://labcopai.com/user/inspections",
+    "capturedAt": "2026-10-06T11:03:35.715Z",
+    "source": "live production UI",
+    "redacted": true
+  },
+  {
+    "file": "22-announcements.png",
+    "caption": "通告与预警",
+    "role": "admin",
+    "url": "https://labcopai.com/admin/announcements",
+    "capturedAt": "2026-10-06T11:03:36.918Z",
+    "source": "live production UI",
+    "redacted": true
+  },
+  {
+    "file": "25-compounds.png",
+    "caption": "组内化合物列表及结构、库存和关联实验记录",
+    "role": "admin",
+    "url": "https://labcopai.com/admin/compounds",
+    "capturedAt": "2026-10-06T11:04:59.596Z",
+    "source": "live production UI",
+    "redacted": true
+  },
+  {
+    "file": "07-member-reagents.png",
+    "caption": "实验员试剂库与预警",
+    "role": "member",
+    "url": "https://labcopai.com/user/alerts",
+    "capturedAt": "2026-10-06T11:03:40.174Z",
+    "source": "live production UI",
+    "redacted": true
+  },
+  {
+    "file": "35-projects.png",
+    "caption": "课题知识库",
+    "role": "admin",
+    "url": "https://labcopai.com/admin/knowledge",
+    "capturedAt": "2026-10-06T11:03:40.392Z",
+    "source": "live production UI",
+    "redacted": true
+  },
+  {
+    "file": "23-notifications.png",
+    "caption": "实验员通知中心",
+    "role": "member",
+    "url": "https://labcopai.com/user/notifications",
+    "capturedAt": "2026-10-06T11:03:41.769Z",
+    "source": "live production UI",
+    "redacted": true
+  },
+  {
+    "file": "47-assistant.png",
+    "caption": "管理员 AI 助手",
+    "role": "admin",
+    "url": "https://labcopai.com/admin/assistant",
+    "capturedAt": "2026-10-06T11:03:41.954Z",
+    "source": "live production UI",
+    "redacted": true
+  },
+  {
+    "file": "08-reagent-upload.png",
+    "caption": "试剂入库与票据识别",
+    "role": "member",
+    "url": "https://labcopai.com/user/upload",
+    "capturedAt": "2026-10-06T11:03:43.400Z",
+    "source": "live production UI",
+    "redacted": true
+  },
+  {
+    "file": "24-records.png",
+    "caption": "实验员业务记录",
+    "role": "member",
+    "url": "https://labcopai.com/user/records",
+    "capturedAt": "2026-10-06T11:03:45.039Z",
+    "source": "live production UI",
+    "redacted": true
+  },
+  {
+    "file": "48-member-assistant.png",
+    "caption": "实验员智能助手",
+    "role": "member",
+    "url": "https://labcopai.com/user/assistant",
+    "capturedAt": "2026-10-06T11:03:46.651Z",
+    "source": "live production UI",
+    "redacted": true
+  },
+  {
+    "file": "26-compound-text-search.png",
+    "caption": "按名称搜索 Aspirin 的实际结果",
+    "role": "admin",
+    "url": "https://labcopai.com/admin/compounds",
+    "capturedAt": "2026-10-06T11:05:00.409Z",
+    "source": "live production UI",
+    "redacted": true
+  },
+  {
+    "file": "27-structure-drawing.png",
+    "caption": "Ketcher 绘图查询：加载苯环并选择子结构匹配",
+    "role": "admin",
+    "url": "https://labcopai.com/admin/compounds",
+    "capturedAt": "2026-10-06T11:05:11.285Z",
+    "source": "live production UI",
+    "redacted": true
+  },
+  {
+    "file": "28-structure-results.png",
+    "caption": "苯环子结构查询返回的线上化合物",
+    "role": "admin",
+    "url": "https://labcopai.com/admin/compounds",
+    "capturedAt": "2026-10-06T11:05:12.946Z",
+    "source": "live production UI",
+    "redacted": true
+  },
+  {
+    "file": "36-project-overview.png",
+    "caption": "课题概览：总体进度、研究目标和关联化合物",
+    "role": "admin",
+    "url": "https://labcopai.com/admin/knowledge",
+    "capturedAt": "2026-10-06T11:05:46.757Z",
+    "source": "live production UI",
+    "redacted": true
+  },
+  {
+    "file": "37-project-gantt.png",
+    "caption": "按自然周展示的阶段任务甘特图",
+    "role": "admin",
+    "url": "https://labcopai.com/admin/knowledge",
+    "capturedAt": "2026-10-06T11:05:46.934Z",
+    "source": "live production UI",
+    "redacted": true
+  },
+  {
+    "file": "38-project-task-form.png",
+    "caption": "阶段任务：排期、状态、完成度与责任人（未提交）",
+    "role": "admin",
+    "url": "https://labcopai.com/admin/knowledge",
+    "capturedAt": "2026-10-06T11:05:47.150Z",
+    "source": "live production UI",
+    "redacted": true
+  },
+  {
+    "file": "40-weekly-report-form.png",
+    "caption": "提交课题周报：正文、阻塞、计划与附件（未提交草稿）",
+    "role": "admin",
+    "url": "https://labcopai.com/admin/knowledge",
+    "capturedAt": "2026-10-06T11:05:47.381Z",
+    "source": "live production UI",
+    "redacted": true
+  },
+  {
+    "file": "42-project-members.png",
+    "caption": "课题成员权限与课题管理员设置",
+    "role": "admin",
+    "url": "https://labcopai.com/admin/knowledge",
+    "capturedAt": "2026-10-06T11:05:48.324Z",
+    "source": "live production UI",
+    "redacted": true
+  },
+  {
+    "file": "43-project-history.png",
+    "caption": "课题追加式版本与操作记录",
+    "role": "admin",
+    "url": "https://labcopai.com/admin/knowledge",
+    "capturedAt": "2026-10-06T11:05:49.041Z",
+    "source": "live production UI",
+    "redacted": true
+  },
+  {
+    "file": "44-project-summary.png",
+    "caption": "课题总结入口（未发起模型生成）",
+    "role": "admin",
+    "url": "https://labcopai.com/admin/knowledge",
+    "capturedAt": "2026-10-06T11:05:49.157Z",
+    "source": "live production UI",
+    "redacted": true
+  },
+  {
+    "file": "39-weekly-reports.png",
+    "caption": "线上已有课题周报与备份附件",
+    "role": "admin",
+    "url": "https://labcopai.com/admin/knowledge",
+    "capturedAt": "2026-10-06T11:06:17.543Z",
+    "source": "live production UI",
+    "redacted": true
+  },
+  {
+    "file": "41-project-documents.png",
+    "caption": "课题文档上传、版本状态和审核入口",
+    "role": "admin",
+    "url": "https://labcopai.com/admin/knowledge",
+    "capturedAt": "2026-10-06T11:06:17.658Z",
+    "source": "live production UI",
+    "redacted": true
+  },
+  {
+    "file": "35a-project-create.png",
+    "caption": "新建课题表单（未提交）",
+    "role": "admin",
+    "url": "https://labcopai.com/admin/knowledge",
+    "capturedAt": "2026-10-06T11:06:18.857Z",
+    "source": "live production UI",
+    "redacted": true
+  },
+  {
+    "file": "01-login.png",
+    "caption": "线上登录页、身份选择和作者标识",
+    "role": "public",
+    "url": "https://labcopai.com/login",
+    "capturedAt": "2026-10-06T11:09:42.810Z",
+    "source": "live production UI",
+    "redacted": true
+  },
+  {
+    "file": "01a-login-mobile.png",
+    "caption": "手机浏览器登录页",
+    "role": "public",
+    "url": "https://labcopai.com/login",
+    "capturedAt": "2026-10-06T11:09:42.908Z",
+    "source": "live production UI",
+    "redacted": true
+  },
+  {
+    "file": "02-registration.png",
+    "caption": "账号申请入口（未提交）",
+    "role": "public",
+    "url": "https://labcopai.com/register",
+    "capturedAt": "2026-10-06T11:09:43.734Z",
+    "source": "live production UI",
+    "redacted": true
+  },
+  {
+    "file": "12-equipment-booking-form.png",
+    "caption": "设备预约排期与可选时段（未提交预约）",
+    "role": "member",
+    "url": "https://labcopai.com/user/equipment-apply",
+    "capturedAt": "2026-10-06T11:12:44.945Z",
+    "source": "live production UI",
+    "redacted": true
+  },
+  {
+    "file": "07a-requisition-form.png",
+    "caption": "试剂领用申请表单（未提交）",
+    "role": "member",
+    "url": "https://labcopai.com/user/alerts",
+    "capturedAt": "2026-10-06T11:12:55.370Z",
+    "source": "live production UI",
+    "redacted": true
+  },
+  {
+    "file": "08a-manual-intake.png",
+    "caption": "手工票据入库（未提交）",
+    "role": "member",
+    "url": "https://labcopai.com/user/upload",
+    "capturedAt": "2026-10-06T11:12:56.364Z",
+    "source": "live production UI",
+    "redacted": true
+  },
+  {
+    "file": "08b-receipt-archive.png",
+    "caption": "补录遗漏票据：仅归档原图（未上传）",
+    "role": "member",
+    "url": "https://labcopai.com/user/upload",
+    "capturedAt": "2026-10-06T11:12:56.482Z",
+    "source": "live production UI",
+    "redacted": true
+  },
+  {
+    "file": "45-member-project-tasks.png",
+    "caption": "实验员查看课题任务与进度",
+    "role": "member",
+    "url": "https://labcopai.com/user/knowledge",
+    "capturedAt": "2026-10-06T11:12:57.592Z",
+    "source": "live production UI",
+    "redacted": true
+  },
+  {
+    "file": "50-profile.png",
+    "caption": "个人资料与账号设置",
+    "role": "member",
+    "url": "https://labcopai.com/user/profile",
+    "capturedAt": "2026-10-06T11:12:58.561Z",
+    "source": "live production UI",
+    "redacted": true
+  },
+  {
+    "file": "29-compound-create.png",
+    "caption": "组内化合物录入：基本信息与 SMILES（未提交草稿）",
+    "role": "admin",
+    "url": "https://labcopai.com/admin/compounds",
+    "capturedAt": "2026-10-06T11:13:07.432Z",
+    "source": "live production UI",
+    "redacted": true
+  },
+  {
+    "file": "30-compound-create-details.png",
+    "caption": "化合物录入：课题、来源、数量与位置（未提交草稿）",
+    "role": "admin",
+    "url": "https://labcopai.com/admin/compounds",
+    "capturedAt": "2026-10-06T11:13:07.557Z",
+    "source": "live production UI",
+    "redacted": true
+  },
+  {
+    "file": "30a-compound-import.png",
+    "caption": "化合物批量导入入口（未上传）",
+    "role": "admin",
+    "url": "https://labcopai.com/admin/compounds",
+    "capturedAt": "2026-10-06T11:13:08.540Z",
+    "source": "live production UI",
+    "redacted": true
+  },
+  {
+    "file": "16-review-history.png",
+    "caption": "全部领用与设备预约申请及审批状态",
+    "role": "admin",
+    "url": "https://labcopai.com/admin/review",
+    "capturedAt": "2026-10-06T11:14:26.209Z",
+    "source": "live production UI",
+    "redacted": true
+  },
+  {
+    "file": "17a-inspection-form.png",
+    "caption": "派发巡检任务（未提交）",
+    "role": "admin",
+    "url": "https://labcopai.com/admin/inspections",
+    "capturedAt": "2026-10-06T11:14:27.896Z",
+    "source": "live production UI",
+    "redacted": true
+  },
+  {
+    "file": "06a-reagent-create.png",
+    "caption": "管理员新增试剂表单（未提交）",
+    "role": "admin",
+    "url": "https://labcopai.com/admin/reagents/new",
+    "capturedAt": "2026-10-06T11:14:28.784Z",
+    "source": "live production UI",
+    "redacted": true
+  },
+  {
+    "file": "06b-reagent-detail.png",
+    "caption": "试剂详情、库存与追溯入口",
+    "role": "admin",
+    "url": "https://labcopai.com/admin/reagents/cmt5fsmi2005601qpwv4vp7xo",
+    "capturedAt": "2026-10-06T11:14:39.734Z",
+    "source": "live production UI",
+    "redacted": true
+  },
+  {
+    "file": "08c-receipt-library.png",
+    "caption": "票据库查询与归档入口",
+    "role": "admin",
+    "url": "https://labcopai.com/admin/reagents",
+    "capturedAt": "2026-10-06T11:14:40.748Z",
+    "source": "live production UI",
+    "redacted": true
+  },
+  {
+    "file": "49-api-config.png",
+    "caption": "模型服务配置（配置内容已遮挡）",
+    "role": "admin",
+    "url": "https://labcopai.com/admin/api-config",
+    "capturedAt": "2026-10-06T11:14:41.633Z",
+    "source": "live production UI",
+    "redacted": true
+  },
+  {
+    "file": "47a-research-assistant.png",
+    "caption": "科研助手模式与附件输入",
+    "role": "admin",
+    "url": "https://labcopai.com/admin/assistant",
+    "capturedAt": "2026-10-06T11:14:42.556Z",
+    "source": "live production UI",
+    "redacted": true
+  },
+  {
+    "file": "48a-assistant-molecule.png",
+    "caption": "AI 输入框分子绘图器（已加载，未发送消息）",
+    "role": "admin",
+    "url": "https://labcopai.com/admin/assistant",
+    "capturedAt": "2026-10-06T11:28:04.840Z",
+    "source": "live production UI",
+    "redacted": true
+  },
+  {
+    "file": "48b-assistant-history.png",
+    "caption": "线上已有助手会话与回答（历史内容）",
+    "role": "admin",
+    "url": "https://labcopai.com/admin/assistant",
+    "capturedAt": "2026-10-06T11:18:46.470Z",
+    "source": "live production UI",
+    "redacted": true
+  },
+  {
+    "file": "31-compound-batches.png",
+    "caption": "香豆素化合物详情和已有合成批次",
+    "role": "admin",
+    "url": "https://labcopai.com/admin/compounds",
+    "capturedAt": "2026-10-06T11:35:11.563Z",
+    "source": "live production UI",
+    "redacted": true
+  },
+  {
+    "file": "32-compound-bioassay.png",
+    "caption": "香豆素已有生物活性测试",
+    "role": "admin",
+    "url": "https://labcopai.com/admin/compounds",
+    "capturedAt": "2026-10-06T11:35:12.088Z",
+    "source": "live production UI",
+    "redacted": true
+  },
+  {
+    "file": "33-compound-usage.png",
+    "caption": "化合物使用记录与新增入口",
+    "role": "admin",
+    "url": "https://labcopai.com/admin/compounds",
+    "capturedAt": "2026-10-06T11:35:12.605Z",
+    "source": "live production UI",
+    "redacted": true
+  },
+  {
+    "file": "34-compound-documents.png",
+    "caption": "化合物表征文档与新增入口",
+    "role": "admin",
+    "url": "https://labcopai.com/admin/compounds",
+    "capturedAt": "2026-10-06T11:35:13.136Z",
+    "source": "live production UI",
+    "redacted": true
+  },
+  {
+    "file": "31a-batch-form.png",
+    "caption": "添加合成批次表单（未提交）",
+    "role": "admin",
+    "url": "https://labcopai.com/admin/compounds",
+    "capturedAt": "2026-10-06T11:19:22.702Z",
+    "source": "live production UI",
+    "redacted": true
+  },
+  {
+    "file": "32a-bioassay-form.png",
+    "caption": "添加生物活性测试表单（未提交）",
+    "role": "admin",
+    "url": "https://labcopai.com/admin/compounds",
+    "capturedAt": "2026-10-06T11:19:23.700Z",
+    "source": "live production UI",
+    "redacted": true
+  }
+]

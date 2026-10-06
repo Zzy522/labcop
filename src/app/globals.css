@@ -1,0 +1,554 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "../styles/arco.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-geist-mono);
+  --font-heading: var(--font-sans);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+}
+
+:root {
+  --background: oklch(0.982 0.006 180);
+  --foreground: oklch(0.22 0.025 205);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.145 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
+  --primary: oklch(0.48 0.11 180);
+  --primary-foreground: oklch(0.99 0 0);
+  --secondary: oklch(0.955 0.012 180);
+  --secondary-foreground: oklch(0.3 0.045 190);
+  --muted: oklch(0.96 0.008 190);
+  --muted-foreground: oklch(0.49 0.025 205);
+  --accent: oklch(0.94 0.025 180);
+  --accent-foreground: oklch(0.38 0.09 180);
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: oklch(0.91 0.012 195);
+  --input: oklch(0.91 0.012 195);
+  --ring: oklch(0.62 0.11 180);
+  --chart-1: oklch(0.64 0.14 180);
+  --chart-2: oklch(0.62 0.13 230);
+  --chart-3: oklch(0.72 0.15 85);
+  --chart-4: oklch(0.64 0.18 35);
+  --chart-5: oklch(0.58 0.16 300);
+  --radius: 0.75rem;
+  --sidebar: oklch(0.31 0.07 190);
+  --sidebar-foreground: oklch(0.97 0.01 180);
+  --sidebar-primary: oklch(0.7 0.12 175);
+  --sidebar-primary-foreground: oklch(0.2 0.04 190);
+  --sidebar-accent: oklch(0.39 0.075 190);
+  --sidebar-accent-foreground: oklch(0.99 0 0);
+  --sidebar-border: oklch(1 0 0 / 12%);
+  --sidebar-ring: oklch(0.7 0.12 175);
+
+  /* Arco Design 主题色覆盖 */
+  --arco-primary-1: #ccfbf1;
+  --arco-primary-2: #99f6e4;
+  --arco-primary-3: #5eead4;
+  --arco-primary-4: #2dd4bf;
+  --arco-primary-5: #14b8a6;
+  --arco-primary-6: #0d9488;
+  --arco-primary-7: #0f766e;
+  --arco-primary-8: #115e59;
+  --arco-primary-9: #134e4a;
+  --arco-primary-10: #042f2e;
+}
+
+.dark {
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.205 0 0);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.205 0 0);
+  --popover-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.922 0 0);
+  --primary-foreground: oklch(0.205 0 0);
+  --secondary: oklch(0.269 0 0);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+  --accent: oklch(0.269 0 0);
+  --accent-foreground: oklch(0.985 0 0);
+  --destructive: oklch(0.704 0.191 22.216);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.556 0 0);
+  --chart-1: oklch(0.87 0 0);
+  --chart-2: oklch(0.556 0 0);
+  --chart-3: oklch(0.439 0 0);
+  --chart-4: oklch(0.371 0 0);
+  --chart-5: oklch(0.269 0 0);
+  --sidebar: oklch(0.205 0 0);
+  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-primary: oklch(0.488 0.243 264.376);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.269 0 0);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.556 0 0);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+    min-width: 320px;
+    text-rendering: optimizeLegibility;
+  }
+  html {
+    @apply font-sans;
+    scroll-behavior: smooth;
+  }
+}
+
+body {
+  background-image:
+    radial-gradient(circle at 8% 0%, rgb(20 184 166 / 0.06), transparent 28rem),
+    radial-gradient(circle at 92% 12%, rgb(14 165 233 / 0.045), transparent 24rem);
+  background-attachment: fixed;
+}
+
+:where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 3px solid rgb(20 184 166 / 0.28);
+  outline-offset: 2px;
+}
+
+.app-shell {
+  background:
+    linear-gradient(180deg, rgb(248 250 252 / 0.96), rgb(241 245 249 / 0.88)),
+    radial-gradient(circle at 85% 0%, rgb(20 184 166 / 0.08), transparent 32rem);
+}
+
+.app-content {
+  width: 100%;
+  max-width: 1600px;
+  margin-inline: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ── Arco Design 深度主题覆盖 ── */
+
+/* Modal / Dialog */
+.arco-modal {
+  border-radius: 16px;
+  box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+}
+.arco-modal-header {
+  border-bottom: none;
+  padding: 20px 24px 0;
+}
+.arco-modal-title {
+  font-size: 17px;
+  font-weight: 600;
+}
+.arco-modal-body {
+  padding: 16px 24px;
+}
+.arco-modal-footer {
+  border-top: none;
+  padding: 0 24px 20px;
+}
+
+/* Drawer */
+.arco-drawer {
+  border-radius: 0;
+}
+.arco-drawer-header {
+  border-bottom: 1px solid #f0f0f0;
+}
+
+/* Button */
+.arco-btn-primary {
+  background-color: var(--arco-primary-6);
+  border-color: var(--arco-primary-6);
+  border-radius: 10px;
+  font-weight: 500;
+  box-shadow: 0 2px 4px rgb(13 148 136 / 0.2);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.arco-btn-primary:hover {
+  background-color: var(--arco-primary-5);
+  border-color: var(--arco-primary-5);
+  box-shadow: 0 4px 12px rgb(13 148 136 / 0.3);
+  transform: translateY(-1px);
+}
+.arco-btn-primary:active {
+  transform: translateY(0);
+}
+.arco-btn-outline {
+  border-radius: 10px;
+  font-weight: 500;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.arco-btn-outline:hover {
+  box-shadow: 0 2px 8px rgb(0 0 0 / 0.08);
+}
+.arco-btn-secondary {
+  border-radius: 10px;
+}
+.arco-btn-text {
+  border-radius: 10px;
+  font-weight: 500;
+}
+.arco-btn {
+  border-radius: 10px;
+}
+
+/* Tabs */
+.arco-tabs {
+  font-weight: 500;
+}
+.arco-tabs-tab {
+  font-size: 14px;
+  transition: color 0.2s;
+}
+.arco-tabs-tab-active {
+  color: var(--arco-primary-6);
+  font-weight: 600;
+}
+.arco-tabs-tab:hover {
+  color: var(--arco-primary-5);
+}
+.arco-tabs-ink {
+  background-color: var(--arco-primary-6);
+  border-radius: 3px;
+  height: 3px;
+}
+.arco-tabs-content-item {
+  padding-top: 16px;
+}
+
+/* Select */
+.arco-select {
+  border-radius: 10px;
+  transition: all 0.2s;
+}
+.arco-select-view-single {
+  height: 36px;
+  border-radius: 10px;
+}
+.arco-select-view-value {
+  line-height: 34px;
+}
+.arco-select-focus {
+  border-color: var(--arco-primary-6);
+  box-shadow: 0 0 0 2px rgb(13 148 136 / 0.1);
+}
+.arco-select:hover {
+  border-color: var(--arco-primary-5);
+}
+.arco-select-popup {
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgb(0 0 0 / 0.1);
+  padding: 4px;
+}
+.arco-select-option {
+  border-radius: 8px;
+  margin: 2px 0;
+}
+.arco-select-option-selected {
+  background-color: var(--arco-primary-1);
+  color: var(--arco-primary-7);
+  font-weight: 600;
+}
+
+/* Switch */
+.arco-switch-checked {
+  background-color: var(--arco-primary-6);
+}
+
+/* Input */
+.arco-input-focus {
+  border-color: var(--arco-primary-6);
+  box-shadow: 0 0 0 2px rgb(13 148 136 / 0.1);
+}
+.arco-input {
+  border-radius: 10px;
+  transition: all 0.2s;
+}
+.arco-input:hover {
+  border-color: var(--arco-primary-5);
+}
+
+/* Pagination */
+.arco-pagination-item-active {
+  background-color: var(--arco-primary-6);
+  border-color: var(--arco-primary-6);
+}
+
+/* Tooltip */
+.arco-tooltip {
+  border-radius: 8px;
+  font-size: 12px;
+  padding: 4px 10px;
+}
+
+/* Badge / Tag */
+.arco-tag {
+  border-radius: 8px;
+}
+
+/* ── 卡片全局增强 ── */
+[class*="card-"] {
+  border-radius: 14px;
+  transition: box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+              transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ── 全局滚动条 ── */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #a1a1a1;
+}
+
+/* ── OCR 原文可视化（PaddleOCR 返回的 markdown/HTML） ── */
+.ocr-markdown {
+  font-size: 12px;
+  line-height: 1.6;
+  color: #374151;
+  word-break: break-word;
+}
+
+/* 表格：边框合并、宽度 100%、背景斑马纹 */
+.ocr-markdown table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 8px 0;
+  font-size: 11px;
+  background-color: #fff;
+}
+
+.ocr-markdown table tr:nth-child(even) {
+  background-color: #f9fafb;
+}
+
+/* 单元格：边框、内边距、自动换行 */
+.ocr-markdown th,
+.ocr-markdown td {
+  border: 1px solid #d1d5db;
+  padding: 4px 6px;
+  text-align: left;
+  vertical-align: top;
+  word-wrap: break-word;
+  word-break: break-all;
+}
+
+.ocr-markdown th {
+  background-color: #f3f4f6;
+  font-weight: 600;
+}
+
+/* 图片：限制最大宽度，避免溢出 */
+.ocr-markdown img {
+  max-width: 100%;
+  height: auto;
+  display: inline-block;
+}
+
+/* 居中 div 容器（PaddleOCR 返回的 <div style="text-align: center;">） */
+.ocr-markdown div {
+  margin: 4px 0;
+}
+
+/* 段落与换行 */
+.ocr-markdown p {
+  margin: 4px 0;
+}
+
+/* 已通过 renderMarkdownAsHtml 转换的标题（Tailwind class 已覆盖样式，此处补充兜底） */
+.ocr-markdown h1,
+.ocr-markdown h2,
+.ocr-markdown h3 {
+  margin-top: 12px;
+  margin-bottom: 4px;
+  font-weight: 600;
+}
+
+.ocr-markdown h1 {
+  font-size: 16px;
+}
+
+.ocr-markdown h2 {
+  font-size: 14px;
+}
+
+.ocr-markdown h3 {
+  font-size: 13px;
+}
+
+/* 列表项 */
+.ocr-markdown ul,
+.ocr-markdown ol {
+  margin: 4px 0;
+  padding-left: 20px;
+}
+
+.ocr-markdown li {
+  margin: 2px 0;
+}
+
+/* ── 登录页机器人集群与注册浮窗 ── */
+@keyframes lab-bot-float {
+  0%, 100% { transform: translateY(0) rotate(-0.6deg); }
+  50% { transform: translateY(-12px) rotate(0.6deg); }
+}
+
+@keyframes lab-bot-orbit {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes lab-auth-shake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-5px); }
+  40%, 80% { transform: translateX(5px); }
+}
+
+@keyframes lab-laser-impact {
+  0%, 100% { transform: scale(0.72); opacity: 0.65; }
+  50% { transform: scale(1.5); opacity: 1; }
+}
+
+@keyframes lab-dialog-enter {
+  from { opacity: 0; transform: translateY(14px) scale(0.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.lab-bot-float {
+  animation: lab-bot-float 4.4s ease-in-out infinite;
+  animation-delay: var(--bot-delay, 0s);
+  will-change: transform;
+}
+
+.lab-bot-eye {
+  transition: transform 120ms ease-out, background-color 180ms ease, box-shadow 180ms ease;
+  will-change: transform;
+}
+
+.lab-bot-orbit {
+  animation: lab-bot-orbit 26s linear infinite;
+  box-shadow: 0 0 70px rgb(45 212 191 / 0.035);
+}
+
+.lab-bot-orbit::before,
+.lab-bot-orbit::after {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: #5eead4;
+  box-shadow: 0 0 18px rgb(94 234 212 / 0.9);
+  content: '';
+}
+
+.lab-bot-orbit::before { left: 12%; top: 13%; }
+.lab-bot-orbit::after { bottom: 7%; right: 19%; opacity: 0.5; }
+
+.lab-bot-orbit-reverse {
+  animation: lab-bot-orbit 18s linear infinite reverse;
+}
+
+.lab-auth-shake {
+  animation: lab-auth-shake 360ms cubic-bezier(.36, .07, .19, .97) both;
+}
+
+.lab-laser-impact {
+  animation: lab-laser-impact 260ms ease-in-out infinite;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.lab-status-alert {
+  animation: lab-laser-impact 420ms ease-in-out 2;
+}
+
+.lab-dialog-backdrop {
+  animation: fade-in 180ms ease-out both;
+}
+
+.lab-dialog-panel {
+  animation: lab-dialog-enter 260ms cubic-bezier(.2, .8, .2, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lab-bot-float,
+  .lab-bot-orbit,
+  .lab-bot-orbit-reverse,
+  .lab-laser-impact,
+  .lab-status-alert,
+  .lab-dialog-backdrop,
+  .lab-dialog-panel,
+  .lab-auth-shake {
+    animation: none !important;
+  }
+
+  .lab-bot-eye {
+    transition: none;
+  }
+}

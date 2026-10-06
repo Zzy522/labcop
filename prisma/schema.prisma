@@ -1,0 +1,1770 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model BusinessOperation {
+  id        String   @id @default(cuid())
+  labId     String
+  userId    String
+  operation String
+  key       String
+  digest    String
+  response  String?
+  createdAt DateTime @default(now())
+
+  @@unique([labId, userId, operation, key])
+}
+
+// ─── 用户 ───
+model User {
+  id               String    @id @default(cuid())
+  name             String
+  email            String    @unique
+  password         String
+  // 邮箱验证时间（null = 未验证）；注册后发送验证邮件，点击链接后置为当前时间
+  emailVerified    DateTime?
+  role             String    @default("MEMBER") // 过渡期只读镜像：ADMIN | MEMBER
+  platformRole     String    @default("PLATFORM_USER") // PLATFORM_USER | PLATFORM_ADMIN
+  status           String    @default("ACTIVE") // PENDING_APPROVAL | ACTIVE | REJECTED | SUSPENDED | DISABLED | RETIRED
+  labId            String? // 过渡期主实验室镜像；授权以 LabMembership 为准
+  phoneEncrypted   String?
+  institutionType  String? // UNIVERSITY | ENTERPRISE
+  schoolName       String?
+  collegeName      String?
+  academicIdentity String? // TEACHER | STUDENT
+  companyName      String?
+  companyIdentity  String?
+  statusReason     String?
+  statusChangedAt  DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  lab                              Lab?                       @relation(fields: [labId], references: [id])
+  reagentLogs                      ReagentLog[]
+  documents                        Document[]
+  deviceUsages                     DeviceUsage[]
+  requisitions                     Requisition[]              @relation("ApplicantRequisitions")
+  reviewedRequisitions             Requisition[]              @relation("ReviewerRequisitions")
+  inspections                      Inspection[]
+  resolvedRiskEvents               RiskEvent[]
+  auditLogs                        AuditLog[]                 @relation("AuditLogOperator")
+  stockInReagents                  Reagent[]                  @relation("ReagentStockInOperator")
+  // 资质相关
+  userQualifications               UserQualification[]
+  // 设备预约相关
+  deviceReservations               DeviceReservation[]        @relation("ReservationUser")
+  reviewedReservations             DeviceReservation[]        @relation("ReservationReviewer")
+  // 巡检派发相关
+  assignedInspections              InspectionAssignment[]     @relation("InspectionAssignee")
+  assignedByInspections            InspectionAssignment[]     @relation("InspectionAssigner")
+  // API 凭证配置（个人级）
+  apiCredentials                   ApiCredential[]
+  // 通告相关：创建的通告、阅读记录、派发的待办、接收的待办
+  createdAnnouncements             Announcement[]             @relation("AnnouncementCreator")
+  announcementReads                AnnouncementRead[]
+  assignedTodos                    Todo[]                     @relation("TodoAssignee")
+  createdTodos                     Todo[]                     @relation("TodoAssigner")
+  // Copilot 记忆与画像相关
+  chatSessions                     ChatSession[]
+  chatMessagesAsUser               ChatMessage[]              @relation("ChatMessageUser")
+  chatMessagesAsAssistant          ChatMessage[]              @relation("ChatMessageAssistant")
+  notifications                    Notification[]             @relation("NotificationRecipient")
+  userProfile                      UserProfile?
+  userActionLogs                   UserActionLog[]
+  // 化合物知识库相关
+  compoundsCreated                 Compound[]                 @relation("CompoundCreator")
+  compoundUsageLogs                CompoundUsageLog[]         @relation("CompoundUsageUser")
+  synthesisBatches                 SynthesisBatch[]           @relation("SynthesisBatchOperator")
+  bioAssaysTested                  BioAssay[]                 @relation("BioAssayTester")
+  compoundDocsUploaded             CompoundDocument[]         @relation("CompoundDocUploader")
+  researchProjectsCreated          ResearchProject[]          @relation("ResearchProjectCreator")
+  projectMemberships               ProjectMember[]            @relation("ProjectMemberUser")
+  projectTaskAssignments           ProjectTaskAssignee[]      @relation("ProjectTaskAssigneeUser")
+  projectTaskUpdates               ProjectTaskUpdate[]        @relation("ProjectTaskUpdateAuthor")
+  projectChangeRequests            ProjectTaskChangeRequest[] @relation("ProjectChangeRequester")
+  projectChangeReviews             ProjectTaskChangeRequest[] @relation("ProjectChangeReviewer")
+  projectDocumentVersions          ProjectDocumentVersion[]   @relation("ProjectDocumentVersionUploader")
+  projectDocumentReviews           ProjectDocumentReview[]    @relation("ProjectDocumentReviewer")
+  projectChangeLogs                ProjectChangeLog[]         @relation("ProjectChangeOperator")
+  projectWeeklyReports             ProjectWeeklyReport[]      @relation("ProjectWeeklyReportAuthor")
+  projectAiSummaries               ProjectAiSummary[]         @relation("ProjectAiSummaryRequester")
+  onboardingProgress               OnboardingProgress[]
+  // 入组申请相关：自己提交的申请、自己审核的申请
+  joinRequests                     JoinRequest[]
+  reviewedJoinRequests             JoinRequest[]              @relation("JoinRequestReviewer")
+  // 作为核心管理员的实验室
+  ownedLabs                        Lab[]                      @relation("LabOwner")
+  entityMemories                   EntityMemory[]
+  // 邮箱验证 / 密码重置令牌（一次性，过期清理）
+  emailVerificationTokens          EmailVerificationToken[]
+  passwordResetTokens              PasswordResetToken[]
+  authSessions                     AuthSession[]
+  labMemberships                   LabMembership[]            @relation("LabMembershipUser")
+  approvedLabMemberships           LabMembership[]            @relation("LabMembershipApprover")
+  collegeMemberships               CollegeMembership[]        @relation("CollegeMembershipUser")
+  approvedCollegeMemberships       CollegeMembership[]        @relation("CollegeMembershipApprover")
+  registrationApplications         RegistrationApplication[]  @relation("RegistrationApplicant")
+  reviewedRegistrationApplications RegistrationApplication[]  @relation("RegistrationReviewer")
+  platformAuditLogs                PlatformAuditLog[]         @relation("PlatformAuditOperator")
+
+  @@index([labId])
+  @@index([role])
+  @@index([status])
+  @@index([platformRole])
+}
+
+// ─── 实验室 ───
+model Lab {
+  id                     String    @id @default(cuid())
+  name                   String
+  location               String
+  school                 String? // 学校名称
+  college                String? // 学院名称
+  description            String?
+  // 实验室工作时间（用于设备预约非常规时间判定）
+  workStartTime          String? // HH:mm，默认 08:00
+  workEndTime            String? // HH:mm，默认 22:30
+  // 实验室加入码：6 位大写字母数字，实验员凭此码申请加入；可重置
+  joinCode               String?   @unique
+  // 核心管理员（创建者）用户ID：负责审批本实验室管理员/实验员的加入申请
+  ownerId                String?
+  collegeId              String?
+  status                 String    @default("ACTIVE") // ACTIVE | SUSPENDED | PENDING_DELETION | DELETED
+  deletionPreviousStatus String?
+  deletionRequestedAt    DateTime?
+  deletionScheduledAt    DateTime?
+  deletionRequestedById  String?
+  deletedAt              DateTime?
+  createdAt              DateTime  @default(now())
+  updatedAt              DateTime  @updatedAt
+
+  owner                    User?                     @relation("LabOwner", fields: [ownerId], references: [id], onDelete: SetNull)
+  users                    User[]
+  reagents                 Reagent[]
+  devices                  Device[]
+  inspections              Inspection[]
+  apiCredentials           ApiCredential[]
+  requisitions             Requisition[]
+  riskEvents               RiskEvent[]
+  auditLogs                AuditLog[]
+  documents                Document[]
+  // 通告与待办
+  announcements            Announcement[]
+  todos                    Todo[]
+  // Copilot 记忆与画像相关
+  chatSessions             ChatSession[]
+  notifications            Notification[]
+  userProfiles             UserProfile[]
+  userActionLogs           UserActionLog[]
+  // 化合物知识库相关
+  compounds                Compound[]
+  synthesisBatches         SynthesisBatch[]
+  bioAssays                BioAssay[]
+  compoundUsageLogs        CompoundUsageLog[]
+  compoundDocuments        CompoundDocument[]
+  researchProjects         ResearchProject[]
+  joinRequests             JoinRequest[]
+  entityMemories           EntityMemory[]
+  collegeOrganization      College?                  @relation(fields: [collegeId], references: [id], onDelete: SetNull)
+  memberships              LabMembership[]
+  registrationApplications RegistrationApplication[]
+
+  @@index([name])
+  @@index([collegeId])
+  @@index([status, deletionScheduledAt])
+}
+
+// ─── 学院组织（本版本保留接入能力，暂不开放公共预约）───
+model College {
+  id          String   @id @default(cuid())
+  schoolName  String
+  name        String
+  code        String?  @unique
+  status      String   @default("ACTIVE")
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  labs        Lab[]
+  memberships CollegeMembership[]
+
+  @@unique([schoolName, name])
+  @@index([status])
+}
+
+model CollegeMembership {
+  id           String    @id @default(cuid())
+  collegeId    String
+  userId       String
+  role         String    @default("COLLEGE_MEMBER") // COLLEGE_ADMIN | COLLEGE_MEMBER
+  status       String    @default("ACTIVE")
+  approvedById String?
+  approvedAt   DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  college    College @relation(fields: [collegeId], references: [id], onDelete: Cascade)
+  user       User    @relation("CollegeMembershipUser", fields: [userId], references: [id], onDelete: Cascade)
+  approvedBy User?   @relation("CollegeMembershipApprover", fields: [approvedById], references: [id], onDelete: SetNull)
+
+  @@unique([collegeId, userId])
+  @@index([userId, status])
+  @@index([collegeId, role, status])
+}
+
+model LabMembership {
+  id           String    @id @default(cuid())
+  labId        String
+  userId       String
+  role         String    @default("LAB_MEMBER") // LAB_OWNER | LAB_ADMIN | LAB_MEMBER
+  status       String    @default("ACTIVE")
+  isPrimary    Boolean   @default(false)
+  approvedById String?
+  approvedAt   DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  lab        Lab   @relation(fields: [labId], references: [id], onDelete: Cascade)
+  user       User  @relation("LabMembershipUser", fields: [userId], references: [id], onDelete: Cascade)
+  approvedBy User? @relation("LabMembershipApprover", fields: [approvedById], references: [id], onDelete: SetNull)
+
+  @@unique([labId, userId])
+  @@index([userId, status, isPrimary])
+  @@index([labId, role, status])
+}
+
+model RegistrationApplication {
+  id                String    @id @default(cuid())
+  userId            String
+  applicationType   String // CREATE_LAB | JOIN_LAB
+  targetLabId       String?
+  requestedLabRole  String // LAB_OWNER | LAB_ADMIN | LAB_MEMBER
+  requestedLabName  String?
+  requestedLocation String?
+  schoolName        String?
+  collegeName       String?
+  formSnapshot      Json
+  status            String    @default("PENDING")
+  reviewerId        String?
+  reviewComment     String?
+  submittedAt       DateTime  @default(now())
+  reviewedAt        DateTime?
+  updatedAt         DateTime  @updatedAt
+
+  applicant User  @relation("RegistrationApplicant", fields: [userId], references: [id], onDelete: Cascade)
+  targetLab Lab?  @relation(fields: [targetLabId], references: [id], onDelete: SetNull)
+  reviewer  User? @relation("RegistrationReviewer", fields: [reviewerId], references: [id], onDelete: SetNull)
+
+  @@index([status, submittedAt])
+  @@index([targetLabId, status])
+  @@index([userId, status])
+}
+
+model AuthSession {
+  id         String    @id @default(cuid())
+  userId     String
+  tokenHash  String    @unique
+  expiresAt  DateTime
+  revokedAt  DateTime?
+  lastSeenAt DateTime  @default(now())
+  ipHash     String?
+  userAgent  String?
+  createdAt  DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, revokedAt])
+  @@index([expiresAt])
+}
+
+model PlatformAuditLog {
+  id         String   @id @default(cuid())
+  operatorId String
+  action     String
+  targetType String
+  targetId   String
+  beforeData String?
+  afterData  String?
+  note       String?
+  createdAt  DateTime @default(now())
+
+  operator User @relation("PlatformAuditOperator", fields: [operatorId], references: [id], onDelete: Restrict)
+
+  @@index([operatorId, createdAt])
+  @@index([targetType, targetId])
+}
+
+// ─── API 凭证配置（LLM / OCR）───
+model ApiCredential {
+  id        String   @id @default(cuid())
+  labId     String
+  userId    String? // null = 实验室统一配置（管理员为全实验室设置）
+  service   String // llm | ocr
+  provider  String // aliyun | deepseek | paddleocr
+  apiKey    String
+  baseUrl   String?
+  model     String?
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  lab  Lab   @relation(fields: [labId], references: [id], onDelete: Cascade)
+  user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([labId, userId, service])
+}
+
+// ─── 试剂 ───
+model Reagent {
+  archivedAt          DateTime?
+  version             Int       @default(0)
+  id                  String    @id @default(cuid())
+  name                String
+  casNumber           String?
+  specification       String?
+  brand               String?
+  dangerCategory      String?
+  riskLevel           String    @default("LOW") // LOW | HIGH（精简为两级）
+  isHazardous         Boolean   @default(false)
+  isControlled        Boolean   @default(false) // 是否为管制品
+  storageLocation     String?
+  // 库存数量：Float 支持小数（如 0.1 瓶），单位由 unit 字段决定
+  // 例：unit="瓶"，stockQuantity=99.9 表示 99.9 瓶
+  stockQuantity       Float     @default(0)
+  // 累计入库瓶数：一经入库即记录，不随领用递减
+  // 例：入库 5 瓶 → totalStockedBottles=5；领用 2 瓶后 stockQuantity=3，但 totalStockedBottles 仍为 5
+  // 用于 UI 展示"共 N 瓶"（N = 历史总入库量），避免显示 3.6 瓶这种随领用变化的小数
+  totalStockedBottles Float     @default(0)
+  minStock            Float     @default(0)
+  unit                String?
+  // 纯度（如 "98%"、"AR 级"）：化合物入库时填写，试剂可选
+  purity              String?
+  // 容量信息：用于"瓶"↔"mL/g"换算
+  // 例：unit="瓶"，capacityPerUnit=500，capacityUnit="mL" 表示每瓶 500 mL
+  // 由 LLM/手动从 specification 字段解析填充
+  capacityPerUnit     Float?
+  capacityUnit        String?
+  // 密度（g/mL）：用于体积↔质量换算（如 mL → g）
+  // 例：density=0.79 表示乙醇密度 0.79 g/mL
+  density             Float?
+  batchNumber         String?
+  expiryDate          DateTime?
+  labId               String
+  // 入库信息（业务字段，区别于 createdAt）
+  stockInDate         DateTime? // 入库日期
+  stockInOperatorId   String? // 入库人员 ID
+  // 信息增强：结构式 / MSDS / SOP
+  structureImgUrl     String? // 结构式 SVG/PNG URL（PubChem 自动获取）
+  msdsUrl             String? // MSDS 文件 URL
+  msdsFileName        String?
+  sopUrl              String? // SOP 文件 URL
+  sopFileName         String?
+  // PubChem 自动填充字段
+  molecularFormula    String? // 分子式
+  molecularWeight     String? // 分子量
+  iupacName           String? // IUPAC 名称
+  smiles              String? // SMILES 字符串（PubChem 自动获取或人工绘制补全）
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  lab                    Lab                    @relation(fields: [labId], references: [id])
+  stockInOperator        User?                  @relation("ReagentStockInOperator", fields: [stockInOperatorId], references: [id])
+  reagentLogs            ReagentLog[]
+  requisitions           Requisition[]
+  riskEvents             RiskEvent[]
+  // 资质要求关联
+  requiredQualifications ReagentQualification[]
+  // 化合物知识库反向关联（若该试剂被作为化合物入库）
+  compounds              Compound[]
+  // OCR 票据关联：多个试剂可以共同指向同一份原始票据文件
+  receiptDocumentLinks   DocumentReagent[]
+
+  @@index([labId])
+  @@index([casNumber])
+  @@index([riskLevel])
+  @@index([expiryDate])
+  @@index([isControlled])
+  @@index([stockInOperatorId])
+}
+
+// ─── 试剂台账记录 ───
+model ReagentLog {
+  id         String   @id @default(cuid())
+  reagentId  String
+  action     String // STOCK_IN | STOCK_OUT | ADJUST | ARCHIVE
+  quantity   Float // 改为 Float 支持小数（如 0.1 瓶）
+  operatorId String
+  note       String?
+  createdAt  DateTime @default(now())
+
+  reagent   Reagent    @relation(fields: [reagentId], references: [id])
+  operator  User       @relation(fields: [operatorId], references: [id])
+  documents Document[]
+
+  @@index([reagentId])
+  @@index([operatorId])
+  @@index([action])
+}
+
+// ─── 单据记录 ───
+model Document {
+  processingToken     String?
+  processingLeaseAt   DateTime?
+  id                String    @id @default(cuid())
+  type              String // PURCHASE | RECEIPT | STOCK_IN | OTHER
+  fileUrl           String
+  fileName          String?
+  mimeType          String?
+  fileSize          Int?
+  recognitionResult Json?
+  status            String    @default("PENDING") // QUEUED | PROCESSING | PENDING | CONFIRMED | SKIPPED | REJECTED
+  uploadedById      String
+  labId             String?
+  reagentId         String?
+  reagentLogId      String?
+  processingMode    String    @default("OCR") // OCR | MANUAL_ARCHIVE | ARCHIVE_ONLY
+  receiptDate       DateTime?
+  archiveNote       String?
+  reagentName       String?
+  casNumber         String?
+  brand             String?
+  riskLevel         String?
+  isHazardous       Boolean?
+  isControlled      Boolean?
+  createdAt         DateTime  @default(now())
+
+  uploadedBy   User              @relation(fields: [uploadedById], references: [id])
+  lab          Lab?              @relation(fields: [labId], references: [id])
+  reagentLog   ReagentLog?       @relation(fields: [reagentLogId], references: [id], onDelete: SetNull)
+  reagentLinks DocumentReagent[]
+
+  @@index([reagentLogId])
+  @@index([processingMode])
+  @@index([uploadedById])
+  @@index([labId])
+  @@index([reagentId])
+  @@index([reagentName])
+  @@index([casNumber])
+  @@index([riskLevel])
+  @@index([createdAt])
+  @@index([type])
+  @@index([status])
+}
+
+// 一份票据原图只保存为一个 Document；每个识别条目通过本表关联其入库试剂。
+model DocumentReagent {
+  id         String   @id @default(cuid())
+  documentId String
+  reagentId  String
+  itemIndex  Int
+  createdAt  DateTime @default(now())
+
+  document Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  reagent  Reagent  @relation(fields: [reagentId], references: [id], onDelete: Cascade)
+
+  @@unique([documentId, itemIndex])
+  @@unique([documentId, reagentId])
+  @@index([reagentId])
+}
+
+// ─── 设备 ───
+model Device {
+  id             String    @id @default(cuid())
+  name           String
+  model          String?
+  serialNumber   String?
+  location       String?
+  riskLevel      String    @default("LOW") // LOW | MEDIUM | HIGH | CRITICAL
+  status         String    @default("IDLE") // IDLE | IN_USE | MAINTENANCE | DISABLED | SCRAPPED（报废，软删除）
+  labId          String
+  // 报废信息
+  scrappedAt     DateTime?
+  scrappedReason String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  lab                    Lab                   @relation(fields: [labId], references: [id])
+  deviceUsages           DeviceUsage[]
+  riskEvents             RiskEvent[]
+  // 预约相关
+  reservations           DeviceReservation[]
+  // 资质要求关联
+  requiredQualifications DeviceQualification[]
+
+  @@index([labId])
+  @@index([status])
+  @@index([riskLevel])
+}
+
+// ─── 设备使用记录 ───
+model DeviceUsage {
+  id        String    @id @default(cuid())
+  deviceId  String
+  userId    String
+  startTime DateTime
+  endTime   DateTime?
+  purpose   String?
+  status    String    @default("NORMAL") // NORMAL | ABNORMAL
+  note      String?
+  createdAt DateTime  @default(now())
+
+  device Device @relation(fields: [deviceId], references: [id])
+  user   User   @relation(fields: [userId], references: [id])
+
+  @@index([deviceId])
+  @@index([userId])
+  @@index([status])
+}
+
+// ─── 领用申请 ───
+model Requisition {
+  id                String    @id @default(cuid())
+  reagentId         String
+  applicantId       String
+  // quantity：换算到 reagent.unit 后的库存扣减量（如 0.1 瓶）
+  quantity          Float
+  // 用户原始输入的领用信息（如 50 mL）
+  requestedQuantity Float?
+  requestedUnit     String?
+  // 换算说明（如 "50 mL ÷ 500 mL/瓶 = 0.1 瓶"），便于审计与用户理解
+  conversionNote    String?
+  purpose           String?
+  status            String    @default("PENDING") // PENDING | APPROVED | NEEDS_CONFIRM | BLOCKED | REJECTED
+  reviewResult      Json?
+  reviewedById      String?
+  reviewedAt        DateTime?
+  labId             String?
+  // 扩展字段：区分领用(CHECKOUT)/申请(APPLY)，申请需填写使用时间
+  mode              String    @default("APPLY") // CHECKOUT（领用，低风险直接扣库存）| APPLY（申请，需审批）
+  usageTime         DateTime? // 申请使用时间（仅 APPLY 模式必填）
+  createdAt         DateTime  @default(now())
+
+  reagent   Reagent @relation(fields: [reagentId], references: [id])
+  applicant User    @relation("ApplicantRequisitions", fields: [applicantId], references: [id])
+  reviewer  User?   @relation("ReviewerRequisitions", fields: [reviewedById], references: [id])
+  lab       Lab?    @relation(fields: [labId], references: [id])
+
+  @@index([reagentId])
+  @@index([applicantId])
+  @@index([reviewedById])
+  @@index([labId])
+  @@index([status])
+  @@index([mode])
+}
+
+// ─── 风险事件 ───
+model RiskEvent {
+  id           String    @id @default(cuid())
+  type         String // STOCK_LOW | EXPIRING | EXPIRED | INCOMPATIBLE | UNAUTHORIZED | DEVICE_ABNORMAL
+  level        String // INFO | WARNING | CRITICAL
+  description  String
+  reagentId    String?
+  deviceId     String?
+  isResolved   Boolean   @default(false)
+  resolvedAt   DateTime?
+  resolvedById String?
+  labId        String?
+  createdAt    DateTime  @default(now())
+
+  reagent    Reagent? @relation(fields: [reagentId], references: [id])
+  device     Device?  @relation(fields: [deviceId], references: [id])
+  resolvedBy User?    @relation(fields: [resolvedById], references: [id])
+  lab        Lab?     @relation(fields: [labId], references: [id])
+
+  @@index([reagentId])
+  @@index([deviceId])
+  @@index([labId])
+  @@index([type])
+  @@index([level])
+  @@index([isResolved])
+}
+
+// ─── 巡检记录 ───
+model Inspection {
+  id          String   @id @default(cuid())
+  labId       String
+  inspectorId String
+  type        String // SHELF | CABINET | EQUIPMENT | GENERAL
+  result      Json?
+  findings    String?
+  status      String   @default("PENDING") // PENDING | COMPLETED
+  createdAt   DateTime @default(now())
+
+  lab       Lab  @relation(fields: [labId], references: [id])
+  inspector User @relation(fields: [inspectorId], references: [id])
+
+  @@index([labId])
+  @@index([inspectorId])
+  @@index([type])
+  @@index([status])
+}
+
+// ─── 审计日志（统一变更记录） ───
+model AuditLog {
+  id         String   @id @default(cuid())
+  operatorId String
+  action     String // CREATE | UPDATE | DELETE | STATUS_CHANGE | SCRAP | GRANT | REVOKE
+  targetType String // DEVICE | REAGENT | USER | QUALIFICATION | RESERVATION | INSPECTION
+  targetId   String
+  targetName String?
+  beforeData String? // JSON string，变更前数据
+  afterData  String? // JSON string，变更后数据
+  note       String?
+  labId      String?
+  createdAt  DateTime @default(now())
+
+  operator User @relation("AuditLogOperator", fields: [operatorId], references: [id])
+  lab      Lab? @relation(fields: [labId], references: [id])
+
+  @@index([operatorId])
+  @@index([labId])
+  @@index([targetType])
+  @@index([targetId])
+  @@index([action])
+  @@index([createdAt])
+}
+
+// ─── 资质模板 ───
+model Qualification {
+  id          String   @id @default(cuid())
+  name        String // 如「HPLC操作资质」
+  labId       String?
+  collegeId   String?
+  scope       String   @default("LAB") // LAB | COLLEGE | PLATFORM
+  description String?
+  validMonths Int      @default(36) // 默认有效期 36 个月
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  userQualifications  UserQualification[]
+  deviceRequirements  DeviceQualification[]
+  reagentRequirements ReagentQualification[]
+
+  @@unique([labId, name])
+  @@index([name])
+  @@index([labId, scope])
+}
+
+// ─── 用户资质记录 ───
+model UserQualification {
+  id              String   @id @default(cuid())
+  userId          String
+  qualificationId String
+  grantedAt       DateTime @default(now())
+  expireAt        DateTime
+  status          String   @default("VALID") // VALID | EXPIRED | REVOKED
+  note            String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  user          User          @relation(fields: [userId], references: [id])
+  qualification Qualification @relation(fields: [qualificationId], references: [id])
+
+  @@unique([userId, qualificationId])
+  @@index([userId])
+  @@index([qualificationId])
+  @@index([status])
+  @@index([expireAt])
+}
+
+// ─── 设备预约 ───
+model DeviceReservation {
+  id           String    @id @default(cuid())
+  deviceId     String
+  userId       String
+  startTime    DateTime
+  endTime      DateTime
+  purpose      String?
+  fundInfo     String? // 关联基金/课题信息（国自然、横向等）
+  status       String    @default("PENDING") // PENDING | APPROVED | REJECTED | ACTIVE | COMPLETED | CANCELLED
+  reviewedById String?
+  reviewedAt   DateTime?
+  rejectReason String?
+  note         String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  device   Device @relation(fields: [deviceId], references: [id])
+  user     User   @relation("ReservationUser", fields: [userId], references: [id])
+  reviewer User?  @relation("ReservationReviewer", fields: [reviewedById], references: [id])
+
+  @@index([deviceId])
+  @@index([userId])
+  @@index([status])
+  @@index([startTime])
+  @@index([endTime])
+}
+
+// ─── 设备资质要求关联 ───
+model DeviceQualification {
+  deviceId        String
+  qualificationId String
+
+  device        Device        @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+  qualification Qualification @relation(fields: [qualificationId], references: [id], onDelete: Cascade)
+
+  @@id([deviceId, qualificationId])
+}
+
+// ─── 试剂资质要求关联 ───
+model ReagentQualification {
+  reagentId       String
+  qualificationId String
+
+  reagent       Reagent       @relation(fields: [reagentId], references: [id], onDelete: Cascade)
+  qualification Qualification @relation(fields: [qualificationId], references: [id], onDelete: Cascade)
+
+  @@id([reagentId, qualificationId])
+}
+
+// ─── 巡检派发任务 ───
+model InspectionAssignment {
+  id            String    @id @default(cuid())
+  labId         String
+  assigneeId    String // 被派发的实验员
+  assignerId    String // 派发的管理员
+  title         String
+  description   String?
+  dueDate       DateTime
+  status        String    @default("ASSIGNED") // ASSIGNED | SUBMITTED | APPROVED | REJECTED | OVERDUE
+  submittedAt   DateTime?
+  submittedData String? // JSON string：检查项结果
+  photoUrls     String? // JSON array string：照片 URL
+  reviewedAt    DateTime?
+  reviewNote    String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  assignee User @relation("InspectionAssignee", fields: [assigneeId], references: [id])
+  assigner User @relation("InspectionAssigner", fields: [assignerId], references: [id])
+
+  @@index([labId])
+  @@index([assigneeId])
+  @@index([status])
+  @@index([dueDate])
+}
+
+// ─── 通告（实验室全体公告）───
+model Announcement {
+  id                  String    @id @default(cuid())
+  labId               String
+  title               String
+  content             String
+  // 状态：DRAFT（草稿）| PUBLISHED（已发布）| SCHEDULED（定时待发布）
+  status              String    @default("PUBLISHED")
+  // 定时发送时间（status=SCHEDULED 时生效；到时间后由 GET 接口懒加载发布）
+  scheduledAt         DateTime?
+  // 定期发送配置：NONE | DAILY | WEEKLY | MONTHLY
+  isRecurring         Boolean   @default(false)
+  recurringPattern    String    @default("NONE")
+  // 定期发送的具体时间配置
+  // recurringTime：发布时间（HH:mm，默认 08:00）
+  recurringTime       String?
+  // recurringDayOfWeek：每周几发布（1-7，1=周一，7=周日；仅 WEEKLY）
+  recurringDayOfWeek  Int?
+  // recurringDayOfMonth：每月几号发布（1-31；若月份不足则取月底；仅 MONTHLY）
+  recurringDayOfMonth Int?
+  // LLM 优化标记
+  llmOptimized        Boolean   @default(false)
+  createdById         String
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+  // 上次定期派生时间（用于定期发送判断）
+  lastSpawnedAt       DateTime?
+
+  lab       Lab                @relation(fields: [labId], references: [id], onDelete: Cascade)
+  createdBy User               @relation("AnnouncementCreator", fields: [createdById], references: [id])
+  reads     AnnouncementRead[]
+
+  @@index([labId])
+  @@index([status])
+  @@index([scheduledAt])
+  @@index([createdById])
+}
+
+// ─── 通告已读记录 ───
+model AnnouncementRead {
+  id             String   @id @default(cuid())
+  announcementId String
+  userId         String
+  readAt         DateTime @default(now())
+
+  announcement Announcement @relation(fields: [announcementId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([announcementId, userId])
+  @@index([announcementId])
+  @@index([userId])
+}
+
+// ─── 待办事项（统一承载安全检查/设备归位/试剂归还/其他事项）───
+model Todo {
+  id            String    @id @default(cuid())
+  labId         String
+  // 接收人（值日生/设备负责人/试剂申请人/被派发人）
+  assigneeId    String
+  // 派发人（管理员，仅 OTHER 类型需要；系统生成的待办为 null）
+  assignerId    String?
+  // 类型：SAFETY_INSPECTION（总体巡查）| DEVICE_RETURN（设备归位）| REAGENT_RETURN（试剂归还）| OTHER（其他事项）
+  type          String
+  title         String
+  description   String?
+  // 状态：PENDING | DONE
+  status        String    @default("PENDING")
+  // 关联实体 ID（如设备预约 ID、试剂申请 ID、巡检任务 ID）
+  relatedId     String?
+  // 完成人（任一接收人完成后标记；多人接收场景下任一人完成即关闭）
+  completedById String?
+  completedAt   DateTime?
+  dueDate       DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  lab      Lab   @relation(fields: [labId], references: [id], onDelete: Cascade)
+  assignee User  @relation("TodoAssignee", fields: [assigneeId], references: [id], onDelete: Cascade)
+  assigner User? @relation("TodoAssigner", fields: [assignerId], references: [id], onDelete: SetNull)
+
+  @@index([labId])
+  @@index([assigneeId])
+  @@index([assignerId])
+  @@index([type])
+  @@index([status])
+  @@index([relatedId])
+}
+
+// ─── Copilot 会话（短期记忆载体） ───
+model ChatSession {
+  id                   String    @id @default(cuid())
+  userId               String
+  labId                String
+  // 会话角色上下文：admin=管理决策助理 / user=安全咨询助手
+  role                 String    @default("user")
+  // 助手模式：RESEARCH=科研助手 / MANAGEMENT=管理助手
+  assistantMode        String    @default("MANAGEMENT")
+  title                String    @default("新会话")
+  // 摘要：旧消息被压缩后存此处，作为长会话上下文压缩的产物
+  summary              String?
+  // 摘要覆盖的消息范围（ChatMessage.id 数组 JSON）
+  summarizedMessageIds String?
+  // token 估算（粗略，用于窗口管理触发判断）
+  tokenEstimate        Int       @default(0)
+  // 最后一次活跃时间（用于会话列表排序与过期清理）
+  lastActiveAt         DateTime  @default(now())
+  // 软删除：用户主动删除的会话保留 30 天后由 cron 物理清理
+  deletedAt            DateTime?
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+
+  user     User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lab      Lab           @relation(fields: [labId], references: [id], onDelete: Cascade)
+  messages ChatMessage[]
+
+  @@index([userId])
+  @@index([labId])
+  @@index([assistantMode])
+  @@index([lastActiveAt])
+  @@index([deletedAt])
+}
+
+// ─── 新手指引进度（多指引、多版本、跨设备同步）───
+model OnboardingProgress {
+  id              String    @id @default(cuid())
+  userId          String
+  guideKey        String // ADMIN_QUICK | MEMBER_QUICK | MODULE_*
+  guideVersion    Int       @default(1)
+  status          String    @default("NOT_STARTED") // NOT_STARTED | IN_PROGRESS | COMPLETED | DISMISSED
+  lastStep        Int       @default(0)
+  doNotAutoPrompt Boolean   @default(false)
+  completedAt     DateTime?
+  dismissedAt     DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, guideKey, guideVersion])
+  @@index([userId, status])
+  @@index([guideKey, guideVersion])
+}
+
+// ─── Copilot 会话消息 ───
+model ChatMessage {
+  run           AssistantRun?
+  id            String   @id @default(cuid())
+  sessionId     String
+  // 角色：user / assistant / system / tool
+  role          String
+  content       String
+  // 工具调用相关（Function Calling）
+  // toolCalls: LLM 请求的工具调用列表 JSON（assistant 消息）
+  // toolCallId: 工具响应对应的调用 ID（tool 消息）
+  // toolName: 工具名称（tool 消息）
+  toolCalls     String?
+  toolCallId    String?
+  toolName      String?
+  // 反馈标记：用户对 assistant 回复的反馈
+  // null=未反馈 / useful=有用 / not_useful=不准 / reported=举报
+  feedback      String?
+  feedbackNote  String?
+  // token 估算（单条消息）
+  tokenEstimate Int      @default(0)
+  // 生成耗时（毫秒，仅 assistant 消息）
+  latencyMs     Int?
+  // 引用来源（RAG 场景：知识库 chunk ID 列表 JSON）
+  citations     String?
+  createdAt     DateTime @default(now())
+
+  session         ChatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  // user 角色消息的发送者 ID（assistant/system/tool 消息为 null）
+  userId          String?
+  user            User?       @relation("ChatMessageUser", fields: [userId], references: [id], onDelete: SetNull)
+  // assistant 消息的"生成者"用户 ID（实际是 LLM，但记录用户上下文以便审计）
+  assistantUserId String?
+  assistant       User?       @relation("ChatMessageAssistant", fields: [assistantUserId], references: [id], onDelete: SetNull)
+
+  @@index([sessionId])
+  @@index([userId])
+  @@index([assistantUserId])
+  @@index([role])
+  @@index([createdAt])
+  @@index([feedback])
+}
+
+// One durable diagnostic run per answer. Content follows the conversation deletion lifecycle.
+model AssistantDiagnosticPolicy {
+  labId String @id
+  enabled Boolean @default(false)
+  expiresAt DateTime?
+  retentionDays Int @default(30)
+  updatedBy String
+  updatedAt DateTime @updatedAt
+}
+
+model AssistantDiagnosticGrant {
+  userId String @id
+  canReadContent Boolean @default(false)
+  canExport Boolean @default(false)
+  labIds String @default("[]") // [] = all labs; only platform admins may hold grants
+  updatedAt DateTime @updatedAt
+}
+
+model AssistantRun {
+  firstTokenMs Int?
+  captureContent Boolean @default(false)
+  shared Boolean @default(false)
+  expiresAt DateTime?
+  purgedAt DateTime?
+  id          String @id @default(cuid())
+  messageId   String @unique
+  message     ChatMessage @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  userId      String
+  labId       String
+  release     String
+  harness     String
+  model       String
+  mode        String
+  status      String @default("RUNNING")
+  input       String @default("{}")
+  output      String @default("")
+  error       String?
+  durationMs  Int?
+  createdAt   DateTime @default(now())
+  finishedAt  DateTime?
+  spans       AssistantSpan[]
+  badCase     AssistantCase?
+  @@index([expiresAt])
+  @@index([userId, labId, createdAt])
+  @@index([status, createdAt])
+}
+
+model AssistantSpan {
+  parentId String?
+  id          String @id @default(cuid())
+  runId       String
+  run         AssistantRun @relation(fields: [runId], references: [id], onDelete: Cascade)
+  sequence    Int
+  kind        String
+  name        String
+  status      String @default("RUNNING")
+  input       String
+  output      String?
+  error       String?
+  durationMs  Int?
+  createdAt   DateTime @default(now())
+  @@unique([runId, sequence])
+}
+
+model AssistantCase {
+  owner String @default("")
+  rootCause String @default("")
+  id          String @id @default(cuid())
+  runId       String @unique
+  run         AssistantRun @relation(fields: [runId], references: [id], onDelete: Cascade)
+  category    String
+  note        String
+  status      String @default("NEW")
+  expected    String @default("")
+  assertions  String @default("{}")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  evaluations AssistantEvaluation[]
+  @@index([status, createdAt])
+}
+
+model AssistantEvaluation {
+  id          String @id @default(cuid())
+  caseId      String
+  badCase     AssistantCase @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  operatorId  String
+  candidate   String
+  result      String
+  createdAt   DateTime @default(now())
+  @@index([caseId, createdAt])
+}
+
+// ─── 通知中心（站内信） ───
+model Notification {
+  id          String    @id @default(cuid())
+  recipientId String
+  labId       String?
+  // 通知类型：REQUISITION_RESULT | RESERVATION_RESULT | ANNOUNCEMENT | TODO_ASSIGNED
+  //         | QUALIFICATION_EXPIRING | INSPECTION_ASSIGNED | RISK_EVENT | SYSTEM
+  type        String
+  title       String
+  content     String
+  // 优先级：LOW | NORMAL | HIGH | URGENT
+  priority    String    @default("NORMAL")
+  // 关联实体（用于点击跳转）
+  relatedType String? // Requisition | Reservation | Announcement | Todo | ...
+  relatedId   String?
+  actionUrl   String?
+  // 已读状态（readAt 非空即代表已读，已读人 = recipient）
+  readAt      DateTime?
+  // 推送渠道：in_app（站内信，必有）/ email / webhook（未来扩展）
+  // 用 JSON 数组存储已推送渠道：["in_app","email"]
+  channels    String    @default("[\"in_app\"]")
+  createdAt   DateTime  @default(now())
+
+  recipient User @relation("NotificationRecipient", fields: [recipientId], references: [id], onDelete: Cascade)
+  lab       Lab? @relation(fields: [labId], references: [id], onDelete: Cascade)
+
+  @@index([recipientId])
+  @@index([labId])
+  @@index([type])
+  @@index([priority])
+  @@index([readAt])
+  @@index([createdAt])
+}
+
+// ─── 平台维护/停服配置（单例，id 固定为 global）───
+model PlatformMaintenance {
+  id             String    @id
+  enabled        Boolean   @default(false)
+  title          String    @default("Lab Copilot 升级中")
+  message        String    @default("我们正在进行系统升级，请稍后再试。")
+  startsAt       DateTime?
+  estimatedEndAt DateTime?
+  lastNotifiedAt DateTime?
+  updatedById    String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@index([enabled, startsAt])
+}
+
+// ─── 入组申请（实验员申请加入实验室，管理员审批） ───
+model JoinRequest {
+  id           String    @id @default(cuid())
+  userId       String // 申请人
+  labId        String // 申请加入的实验室
+  // 申请角色：ADMIN（管理员）| MEMBER（实验员），由核心管理员审批
+  role         String    @default("MEMBER")
+  message      String? // 申请留言
+  status       String    @default("PENDING") // PENDING | APPROVED | REJECTED
+  reviewedById String?
+  reviewedAt   DateTime?
+  rejectReason String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  user     User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lab      Lab   @relation(fields: [labId], references: [id], onDelete: Cascade)
+  reviewer User? @relation("JoinRequestReviewer", fields: [reviewedById], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([labId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+// ─── 实体记忆（专有名词结构化提取：人名/试剂/课题/化合物/靶点等，便于精准检索） ───
+model EntityMemory {
+  id           String   @id @default(cuid())
+  userId       String // 关联用户（实体属于该用户的对话语境）
+  labId        String // 数据隔离边界
+  // 实体类型：PERSON(人名) | REAGENT(试剂) | TOPIC(课题) | COMPOUND(化合物) | TARGET(靶点) | PROJECT(项目) | DEVICE(设备) | OTHER
+  entityType   String
+  name         String // 标准化实体名（去重主键之一）
+  aliases      String? // 别名/缩写，逗号分隔（用于模糊匹配）
+  attributes   String? // JSON 字符串：结构化属性（如 CAS号/靶点/关联课题/角色等）
+  mentionCount Int      @default(1) // 提及次数（用于重要性排序）
+  firstSeenAt  DateTime @default(now())
+  lastSeenAt   DateTime @default(now())
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lab  Lab  @relation(fields: [labId], references: [id], onDelete: Cascade)
+
+  // 同一用户下同类型同名实体唯一（标准化名去重）
+  @@unique([userId, labId, entityType, name])
+  @@index([labId])
+  @@index([entityType])
+  @@index([lastSeenAt])
+}
+
+// ─── 用户画像（长期记忆载体） ───
+model UserProfile {
+  id                      String    @id @default(cuid())
+  userId                  String    @unique
+  labId                   String
+  // 静态画像（系统派生，用户不可编辑）
+  // JSON：{ role, joinedAt, qualifications: [...], labName }
+  staticProfile           String
+  // 动态画像 - 隐式（行为派生，用户不可直接编辑）
+  // JSON：{ topReagents: [], topDevices: [], sessionCount, riskPattern, expertise }
+  dynamicImplicit         String    @default("{}")
+  // 动态画像 - 显式（用户可编辑的偏好）
+  // JSON：{ communicationStyle, detailLevel, languagePreference, customInstructions }
+  dynamicExplicit         String    @default("{}")
+  // LLM 周期总结产物（每周日 02:00 由 cron 生成）
+  // JSON：{ expertise, communication_style, risk_appetite, knowledge_gaps, suggested_reminders, free_text_summary, generatedAt }
+  llmSummary              String?
+  llmSummaryGeneratedAt   DateTime?
+  // 用户对画像的纠正说明（用户提交，下次 LLM 总结会读取）
+  userCorrection          String?
+  userCorrectionUpdatedAt DateTime?
+  // 画像可见性开关（默认完全透明）
+  // visible_to_user: 用户能否查看自己的画像（默认 true）
+  // visible_to_admin: 管理员能否查看成员画像（默认 true）
+  visibleToUser           Boolean   @default(true)
+  visibleToAdmin          Boolean   @default(true)
+  createdAt               DateTime  @default(now())
+  updatedAt               DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lab  Lab  @relation(fields: [labId], references: [id], onDelete: Cascade)
+
+  @@index([labId])
+  @@index([visibleToUser])
+  @@index([visibleToAdmin])
+}
+
+// ─── 用户行为日志（画像派生输入） ───
+model UserActionLog {
+  id         String   @id @default(cuid())
+  userId     String
+  labId      String
+  // 行为类型：CHAT_MESSAGE | REAGENT_VIEW | REAGENT_REQUISITION | REAGENT_CHECKOUT
+  //         | DEVICE_RESERVE | DEVICE_CANCEL | INSPECTION_SUBMIT | TODO_COMPLETE
+  //         | QUALIFICATION_GRANT | VIOLATION_RECORDED | LOGIN
+  action     String
+  // 实体类型与 ID（可选，如 REAGENT_VIEW 时 entityType=Reagent entityId=xxx）
+  entityType String?
+  entityId   String?
+  // 行为元数据 JSON（如试剂名、设备名、耗时等）
+  metadata   String?
+  // 行为发生时所在的会话 ID（用于关联对话上下文）
+  sessionId  String?
+  // 风险标记：系统判断该行为是否涉及风险（如违规操作）
+  riskFlag   Boolean  @default(false)
+  riskNote   String?
+  // 自动清理：90 天后由 cron 删除（隐私保护）
+  expireAt   DateTime
+  createdAt  DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lab  Lab  @relation(fields: [labId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([labId])
+  @@index([action])
+  @@index([entityType, entityId])
+  @@index([riskFlag])
+  @@index([expireAt])
+  @@index([createdAt])
+}
+
+// ─────────────────────────────────────────────────────────
+// 化合物知识库（Compound Knowledge Base）
+// ─────────────────────────────────────────────────────────
+// 设计思路：
+// - Compound 是化学实体（合成产物或天然分离物），独立于 Reagent（试剂库存）
+//   Reagent 表征"库存商品"，Compound 表征"实验室产物"
+// - SynthesisBatch 记录每次合成实验（条件、收率、产物表征）
+// - BioAssay 记录生物活性测试（IC50、抑菌率等）
+// - CompoundUsageLog 记录化合物的使用去向（对接 Requisition 还是其他实验）
+// - CompoundDocument 存放 NMR/MS/IR/HPLC 等表征图谱与报告
+
+// ─── 化合物主体 ───
+model Compound {
+  id               String   @id @default(cuid())
+  labId            String
+  // 化合物标识
+  name             String // 内部命名（如 "XY-001"）
+  commonName       String? // 通用名/IUPAC（如 "Aspirin"）
+  casNumber        String? // CAS 号（若已知）
+  // 结构信息
+  smiles           String? // SMILES 字符串
+  molecularFormula String? // 分子式
+  molecularWeight  Float? // 分子量
+  // 物理化学性质（JSON：{ appearance, mp, bp, density, solubility, ... }）
+  physicochemical  String?
+  // 安全信息（JSON：{ hazardStatements, precautionary, storage, ... }）
+  safetyInfo       String?
+  // 合成方法摘要（Markdown，详细步骤在 SynthesisBatch）
+  synthesisNote    String?
+  // 来源：SYNTHESIZED（自合成）| PURCHASED（购买）| GIFT（赠予）| OTHER
+  source           String   @default("SYNTHESIZED")
+  // 状态：ACTIVE（在用）| ARCHIVED（归档）| DISPOSED（已处置）
+  status           String   @default("ACTIVE")
+  // 关联试剂（若该化合物已作为试剂入库，则建立关联）
+  reagentId        String?
+  // 创建与归属
+  createdById      String
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  lab              Lab                @relation(fields: [labId], references: [id], onDelete: Cascade)
+  createdBy        User               @relation("CompoundCreator", fields: [createdById], references: [id])
+  reagent          Reagent?           @relation(fields: [reagentId], references: [id], onDelete: SetNull)
+  synthesisBatches SynthesisBatch[]
+  bioAssays        BioAssay[]
+  usageLogs        CompoundUsageLog[]
+  documents        CompoundDocument[]
+  projectLinks     ProjectCompound[]
+
+  @@index([labId])
+  @@index([name])
+  @@index([casNumber])
+  @@index([smiles])
+  @@index([status])
+  @@index([createdById])
+  @@index([reagentId])
+}
+
+// ─── 合成批次（每次合成记录） ───
+model SynthesisBatch {
+  id                   String   @id @default(cuid())
+  compoundId           String
+  labId                String
+  // 批次编号（如 "XY-001-B01"）
+  batchNumber          String
+  // 合成日期
+  synthesizedAt        DateTime
+  // 合成方法/路线（Markdown 详细步骤）
+  procedure            String
+  // 反应条件（JSON：{ temperature, duration, catalyst, solvent, atmosphere, ... }）
+  reactionConditions   String?
+  // 投料信息（JSON 数组：[{ reagent, equivalents, mass, volume, ... }])
+  reactants            String?
+  // 产物信息
+  productMass          Float? // 产物质量（g）
+  yieldPercent         Float? // 收率（%）
+  purityPercent        Float? // 纯度（%）
+  // 表征摘要（详细图谱在 CompoundDocument）
+  characterizationNote String?
+  // 操作人员
+  operatorId           String
+  // 备注
+  note                 String?
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  compound  Compound           @relation(fields: [compoundId], references: [id], onDelete: Cascade)
+  lab       Lab                @relation(fields: [labId], references: [id], onDelete: Cascade)
+  operator  User               @relation("SynthesisBatchOperator", fields: [operatorId], references: [id])
+  documents CompoundDocument[]
+  bioAssays BioAssay[]
+
+  @@unique([compoundId, batchNumber])
+  @@index([compoundId])
+  @@index([labId])
+  @@index([batchNumber])
+  @@index([synthesizedAt])
+  @@index([operatorId])
+}
+
+// ─── 生物活性测试（BioAssay） ───
+model BioAssay {
+  id            String   @id @default(cuid())
+  compoundId    String
+  labId         String
+  // 可选：从特定批次测试（不填 = 直接测化合物）
+  batchId       String?
+  // 测试类型：ANTIBACTERIAL（抑菌）| ANTITUMOR（抗肿瘤）| ENZYME（酶抑制）
+  //         | CYTOTOXICITY（细胞毒性）| ANTIOXIDANT（抗氧化）| OTHER
+  assayType     String
+  // 测试目标（如 "大肠杆菌"、"A549 细胞"、"某种激酶"）
+  target        String?
+  // 测试结果（JSON：{ ic50, mic, zoneDiameter, inhibitionRate, ... })
+  // 数值类型多样，统一用 JSON 保留灵活性
+  result        String
+  // 单位与数值摘要（用于列表展示，如 "IC50 = 12.3 μM"）
+  resultSummary String?
+  // 测试条件（JSON：{ concentration, duration, replicate, control, ... }）
+  conditions    String?
+  // 结论与备注
+  conclusion    String?
+  note          String?
+  // 测试人员
+  testedById    String
+  testedAt      DateTime
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  compound Compound        @relation(fields: [compoundId], references: [id], onDelete: Cascade)
+  lab      Lab             @relation(fields: [labId], references: [id], onDelete: Cascade)
+  batch    SynthesisBatch? @relation(fields: [batchId], references: [id], onDelete: SetNull)
+  testedBy User            @relation("BioAssayTester", fields: [testedById], references: [id])
+
+  @@index([compoundId])
+  @@index([labId])
+  @@index([batchId])
+  @@index([assayType])
+  @@index([target])
+  @@index([testedById])
+  @@index([testedAt])
+}
+
+// ─── 化合物使用记录 ───
+model CompoundUsageLog {
+  id          String   @id @default(cuid())
+  compoundId  String
+  labId       String
+  // 使用类型：ASSAY（测试）| REQUISITION（领用）| TRANSFER（转移）| DISPOSAL（处置）| OTHER
+  usageType   String
+  // 使用量
+  quantity    Float
+  unit        String // g | mg | mL | μmol | ...
+  // 使用去向/目的
+  purpose     String?
+  // 关联实体（如 Requisition.id、BioAssay.id 等）
+  relatedType String?
+  relatedId   String?
+  // 使用时间
+  usedAt      DateTime
+  // 使用人员
+  usedById    String
+  // 备注
+  note        String?
+  createdAt   DateTime @default(now())
+
+  compound Compound @relation(fields: [compoundId], references: [id], onDelete: Cascade)
+  lab      Lab      @relation(fields: [labId], references: [id], onDelete: Cascade)
+  usedBy   User     @relation("CompoundUsageUser", fields: [usedById], references: [id])
+
+  @@index([compoundId])
+  @@index([labId])
+  @@index([usageType])
+  @@index([usedById])
+  @@index([usedAt])
+  @@index([relatedType, relatedId])
+}
+
+// ─── 化合物相关文档（图谱/报告） ───
+model CompoundDocument {
+  id           String   @id @default(cuid())
+  compoundId   String
+  labId        String
+  // 可选：关联到特定合成批次（如批次表征图谱）
+  batchId      String?
+  // 文档类型：NMR（1H/13C NMR）| MS（质谱）| IR（红外）| UV（紫外）
+  //         | HPLC（液相）| GC（气相）| MSDS | PURITY_REPORT | OTHER
+  docType      String
+  // 文档子类型（如 NMR 下 "1H" / "13C" / "COSY" 等）
+  docSubtype   String?
+  // 文件信息
+  fileUrl      String
+  fileName     String
+  fileSize     Int?
+  // 备注（如测试条件、仪器型号）
+  note         String?
+  // 上传人员
+  uploadedById String
+  createdAt    DateTime @default(now())
+
+  compound   Compound        @relation(fields: [compoundId], references: [id], onDelete: Cascade)
+  lab        Lab             @relation(fields: [labId], references: [id], onDelete: Cascade)
+  batch      SynthesisBatch? @relation(fields: [batchId], references: [id], onDelete: SetNull)
+  uploadedBy User            @relation("CompoundDocUploader", fields: [uploadedById], references: [id])
+
+  @@index([compoundId])
+  @@index([labId])
+  @@index([batchId])
+  @@index([docType])
+  @@index([uploadedById])
+  @@index([createdAt])
+}
+
+// ─── 科研课题 ───
+model ResearchProject {
+  id          String    @id @default(cuid())
+  labId       String
+  name        String
+  description String?
+  objective   String?
+  status      String    @default("DRAFT") // DRAFT | ACTIVE | PAUSED | COMPLETED | ARCHIVED
+  startDate   DateTime?
+  endDate     DateTime?
+  version     Int       @default(1)
+  createdById String
+  deletedAt   DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  lab             Lab                        @relation(fields: [labId], references: [id], onDelete: Cascade)
+  createdBy       User                       @relation("ResearchProjectCreator", fields: [createdById], references: [id])
+  members         ProjectMember[]
+  tasks           ProjectPhaseTask[]
+  documents       ProjectDocument[]
+  compounds       ProjectCompound[]
+  changeRequests  ProjectTaskChangeRequest[]
+  changeLogs      ProjectChangeLog[]
+  weeklyReports   ProjectWeeklyReport[]
+  aiSummaries     ProjectAiSummary[]
+  backupSnapshots ProjectBackupSnapshot[]
+
+  @@index([labId])
+  @@index([status])
+  @@index([updatedAt])
+  @@index([deletedAt])
+}
+
+// ─── 课题成员（MANAGER 为 1～3 名实验员课题管理员）───
+model ProjectMember {
+  id        String   @id @default(cuid())
+  projectId String
+  userId    String
+  role      String   @default("MEMBER") // MANAGER | MEMBER
+  addedById String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  project ResearchProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user    User            @relation("ProjectMemberUser", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, userId])
+  @@index([projectId, role])
+  @@index([userId])
+}
+
+// ─── 课题阶段任务 ───
+model ProjectPhaseTask {
+  id             String    @id @default(cuid())
+  projectId      String
+  parentId       String?
+  name           String
+  description    String?
+  startDate      DateTime?
+  dueDate        DateTime?
+  completedAt    DateTime?
+  status         String    @default("PLANNED") // PLANNED | IN_PROGRESS | BLOCKED | COMPLETED | CANCELLED
+  priority       String    @default("NORMAL") // LOW | NORMAL | HIGH | URGENT
+  progress       Int       @default(0)
+  estimatedWeeks Int       @default(1)
+  tags           String    @default("[]") // JSON string：当前标签快照
+  blockedReason  String?
+  version        Int       @default(1)
+  createdById    String
+  updatedById    String
+  deletedAt      DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  project        ResearchProject            @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  parent         ProjectPhaseTask?          @relation("ProjectTaskHierarchy", fields: [parentId], references: [id], onDelete: SetNull)
+  children       ProjectPhaseTask[]         @relation("ProjectTaskHierarchy")
+  assignees      ProjectTaskAssignee[]
+  updates        ProjectTaskUpdate[]
+  changeRequests ProjectTaskChangeRequest[]
+
+  @@index([projectId])
+  @@index([parentId])
+  @@index([status])
+  @@index([dueDate])
+  @@index([deletedAt])
+}
+
+// ─── 阶段任务追加式进展说明与标签快照 ───
+model ProjectTaskUpdate {
+  id        String   @id @default(cuid())
+  taskId    String
+  authorId  String
+  note      String
+  progress  Int
+  status    String
+  tags      String   @default("[]")
+  createdAt DateTime @default(now())
+
+  task   ProjectPhaseTask @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  author User             @relation("ProjectTaskUpdateAuthor", fields: [authorId], references: [id], onDelete: Restrict)
+
+  @@index([taskId, createdAt])
+  @@index([authorId])
+}
+
+model ProjectTaskAssignee {
+  taskId    String
+  userId    String
+  isLead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  task ProjectPhaseTask @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  user User             @relation("ProjectTaskAssigneeUser", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([taskId, userId])
+  @@index([userId])
+}
+
+model ProjectTaskChangeRequest {
+  id            String    @id @default(cuid())
+  projectId     String
+  taskId        String
+  requesterId   String
+  baseVersion   Int
+  patchData     String // JSON：允许修改的字段与 assigneeIds
+  reason        String
+  status        String    @default("PENDING") // PENDING | APPROVED | REJECTED | CONFLICT | CANCELLED
+  reviewerId    String?
+  reviewComment String?
+  reviewedAt    DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  project   ResearchProject  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  task      ProjectPhaseTask @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  requester User             @relation("ProjectChangeRequester", fields: [requesterId], references: [id], onDelete: Cascade)
+  reviewer  User?            @relation("ProjectChangeReviewer", fields: [reviewerId], references: [id], onDelete: SetNull)
+
+  @@index([projectId, status])
+  @@index([taskId])
+  @@index([requesterId])
+}
+
+// ─── 课题文档与不可覆盖的文件版本 ───
+model ProjectDocument {
+  id          String    @id @default(cuid())
+  projectId   String
+  title       String
+  docType     String    @default("OTHER")
+  description String?
+  createdById String
+  deletedAt   DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  project  ResearchProject          @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  versions ProjectDocumentVersion[]
+
+  @@index([projectId])
+  @@index([deletedAt])
+}
+
+model ProjectDocumentVersion {
+  id            String    @id @default(cuid())
+  documentId    String
+  version       Int
+  fileUrl       String
+  fileName      String
+  mimeType      String?
+  fileSize      Int?
+  changeNote    String?
+  extractedText String?
+  aiSummary     String?
+  status        String    @default("PENDING_REVIEW") // DRAFT | PENDING_REVIEW | APPROVED | REJECTED
+  uploadedById  String
+  submittedAt   DateTime?
+  createdAt     DateTime  @default(now())
+
+  document   ProjectDocument         @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  uploadedBy User                    @relation("ProjectDocumentVersionUploader", fields: [uploadedById], references: [id], onDelete: Cascade)
+  reviews    ProjectDocumentReview[]
+
+  @@unique([documentId, version])
+  @@index([status])
+  @@index([uploadedById])
+  @@index([createdAt])
+}
+
+model ProjectDocumentReview {
+  id         String   @id @default(cuid())
+  versionId  String
+  reviewerId String
+  decision   String // APPROVED | REJECTED
+  comment    String?
+  createdAt  DateTime @default(now())
+
+  version  ProjectDocumentVersion @relation(fields: [versionId], references: [id], onDelete: Cascade)
+  reviewer User                   @relation("ProjectDocumentReviewer", fields: [reviewerId], references: [id], onDelete: Cascade)
+
+  @@index([versionId])
+  @@index([reviewerId])
+}
+
+model ProjectCompound {
+  projectId  String
+  compoundId String
+  role       String? // LEAD | INTERMEDIATE | CONTROL | CANDIDATE | OTHER
+  addedById  String
+  createdAt  DateTime @default(now())
+
+  project  ResearchProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  compound Compound        @relation(fields: [compoundId], references: [id], onDelete: Cascade)
+
+  @@id([projectId, compoundId])
+  @@index([compoundId])
+}
+
+// ─── 课题周报：管理员与课题成员均可追加提交 ───
+model ProjectWeeklyReport {
+  id        String   @id @default(cuid())
+  projectId String
+  authorId  String
+  weekStart DateTime
+  title     String
+  content   String
+  blockers  String?
+  nextPlan  String?
+  createdAt DateTime @default(now())
+
+  project     ResearchProject                 @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  author      User                            @relation("ProjectWeeklyReportAuthor", fields: [authorId], references: [id], onDelete: Restrict)
+  attachments ProjectWeeklyReportAttachment[]
+
+  @@index([projectId, weekStart])
+  @@index([authorId, createdAt])
+}
+
+// ─── 周报附件：保存原文件、独立备份副本与内容校验值 ───
+model ProjectWeeklyReportAttachment {
+  id        String   @id @default(cuid())
+  reportId  String
+  fileUrl   String
+  backupUrl String
+  fileName  String
+  mimeType  String?
+  fileSize  Int
+  sha256    String
+  createdAt DateTime @default(now())
+
+  report ProjectWeeklyReport @relation(fields: [reportId], references: [id], onDelete: Cascade)
+
+  @@index([reportId])
+  @@index([sha256])
+}
+
+// ─── 课题即时备份清单：数据库保存索引，文件系统保存不可覆盖 JSON 快照 ───
+model ProjectBackupSnapshot {
+  id         String   @id @default(cuid())
+  projectId  String
+  entityType String
+  entityId   String
+  fileUrl    String
+  checksum   String
+  createdAt  DateTime @default(now())
+
+  project ResearchProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId, createdAt])
+  @@index([entityType, entityId])
+}
+
+// ─── AI 课题总结：追加保存问题、结果和是否使用视觉模型 ───
+model ProjectAiSummary {
+  id            String   @id @default(cuid())
+  projectId     String
+  requestedById String
+  question      String
+  content       String
+  usedVision    Boolean  @default(false)
+  createdAt     DateTime @default(now())
+
+  project     ResearchProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  requestedBy User            @relation("ProjectAiSummaryRequester", fields: [requestedById], references: [id], onDelete: Restrict)
+
+  @@index([projectId, createdAt])
+  @@index([requestedById])
+}
+
+// ─── 课题追加式版本历史，禁止覆盖或删除旧记录 ───
+model ProjectChangeLog {
+  id         String   @id @default(cuid())
+  projectId  String
+  entityType String // PROJECT | MEMBER | TASK | TASK_REQUEST | DOCUMENT | DOCUMENT_VERSION | COMPOUND
+  entityId   String
+  action     String // CREATE | UPDATE | DELETE | SUBMIT | APPROVE | REJECT | ARCHIVE | RESTORE
+  beforeData String?
+  afterData  String?
+  source     String   @default("DIRECT") // DIRECT | APPROVED_REQUEST
+  requestId  String?
+  operatorId String
+  reason     String?
+  createdAt  DateTime @default(now())
+
+  project  ResearchProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  operator User            @relation("ProjectChangeOperator", fields: [operatorId], references: [id], onDelete: Restrict)
+
+  @@index([projectId, createdAt])
+  @@index([entityType, entityId])
+  @@index([operatorId])
+  @@index([requestId])
+}
+
+// ─── 邮箱验证令牌（注册后发送，点击链接验证） ───
+model EmailVerificationToken {
+  id        String   @id @default(cuid())
+  userId    String
+  // 存储令牌的 SHA-256 哈希（非原文），防止数据库泄露后被重放
+  tokenHash String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+// ─── 密码重置令牌（忘记密码流程，一次性使用） ───
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  userId    String
+  tokenHash String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+// ─── 图形验证码挑战（同源 SVG、多进程共享、一次性消费）───
+model CaptchaChallenge {
+  id         String    @id
+  answerHash String
+  svg        String
+  attempts   Int       @default(0)
+  expiresAt  DateTime
+  consumedAt DateTime?
+  createdAt  DateTime  @default(now())
+
+  @@index([expiresAt])
+  @@index([consumedAt])
+}
