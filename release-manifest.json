@@ -28,7 +28,7 @@
     "deploy/test_selfhost.py": "de1e61b71ff50f55c28fee79a5a54649cdd8e8c4a52a394db0ab445e42f5b262",
     "deploy/setup.sh": "a780e710b90d2607133ded04c4b21b1a93296e13c6eb024b795083a8521a0e1d",
     "deploy/setup.ps1": "4379ca82bf62bf91cd58db46cd043b8087a3b0adbf92d4e1be5efd7b7f50bc3f",
-    "README.md": "9b55035d7f0967c78d4d28288e4c21382643f57312c3de8c9918f6fb7d9ad134",
+    "README.md": "d26c1ad4a70f222a9c9ef82fb54f6a713de6e92c1f6d24a29b6016bc69170a52",
     "docs/developer-guide.md": "6ad89c3e6831440097b337b31d4f219cdabf92f2d9681124b0300c510022ea66",
     "docs/security-and-limitations.md": "31ff4443a32deea3aaf27e175b3cc732b8e93a0b30a3e389bf68dabac5ca657d",
     "src/app/(admin)/admin/announcements/page.tsx": "d8bceb6f85f4cdf2c1303b0d77fce5ca5632818f97411a27e046066a83f263e9",
@@ -589,5 +589,11 @@
     "docs/screenshots/online-20261006/50-profile.png": "b173fe69d3f7b79456a81379d3b79acff49b00b997ba868707ac9024dc6dcb8d",
     "docs/screenshots/online-20261006/README.md": "2c3f9dfcd2023b37dfdeb7be25e4169f1f3ba0575ff21da882e9376df8eec35b",
     "docs/screenshots/online-20261006/screenshots.json": "5733f28307c1214565459950e9e0f1bbcf5ac3169e946e483e260e4762630fb3"
+  },
+  "documentation_updates": {
+    "README.md": {
+      "source_commit": "5906433e8c72e2bc561ba786f7e1ff5d7709433f",
+      "source_path": "README.community.md"
+    }
   }
 }
